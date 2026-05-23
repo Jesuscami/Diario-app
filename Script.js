@@ -225,4 +225,9 @@ function actualizarSemana() {
       }]
     }
   });
+  if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("PWA activada"))
+    .catch(err => console.log("Error SW", err));
+}
 }
