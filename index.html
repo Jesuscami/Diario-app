@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diario Privado</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+</head>
+
+<body>
+
+<!-- 🔐 LOGIN -->
+<div id="loginBox" class="login">
+
+  <h1>📓 Diario Privado</h1>
+
+  <input type="email" id="email" placeholder="Correo electrónico">
+
+  <div class="password-box">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button type="button" onclick="togglePassword()">👁️</button>
+  </div>
+
+  <button onclick="login()">Entrar</button>
+  <button onclick="register()">Registrarse</button>
+
+  <p id="error"></p>
+</div>
+
+<!-- 📓 APP -->
+<div id="app" class="app hidden">
+  <h1>📓 Tu Diario</h1>
+  <button onclick="logout()">Cerrar sesión</button>
+
+  <textarea id="texto" placeholder="Escribe tu reflexión..."></textarea>
+  <button onclick="guardar()">Guardar</button>
+
+  <div id="lista"></div>
+</div>
+
+<script src="Script.js"></script>
+</body>
+</html>
