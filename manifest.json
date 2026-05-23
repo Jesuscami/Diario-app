@@ -1,0 +1,15 @@
+{
+  "name": "Diario Inteligente",
+  "short_name": "Diario",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e2a38",
+  "theme_color": "#00c6ff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
