@@ -3,40 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Diario Salud Mental</title>
+  <title>Diario IA Emocional</title>
 
   <link rel="stylesheet" href="styles.css">
 
-  <!-- 📊 Chart.js -->
+  <!-- Chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
 
 <body>
 
-<div class="app">
+<!-- 🔐 LOGIN -->
+<div id="loginBox">
+  <h1>🧠 Diario IA Emocional</h1>
 
-  <h1>📓 Diario Inteligente</h1>
+  <input type="email" id="email" placeholder="Correo">
+  <input type="password" id="password" placeholder="Contraseña">
 
-  <!-- 🧠 INPUT -->
+  <button onclick="login()">Entrar</button>
+  <button onclick="register()">Registrarse</button>
+
+  <hr>
+
+  <button onclick="loginGoogle()">🔵 Entrar con Google</button>
+</div>
+
+<!-- 📱 APP -->
+<div id="app" class="hidden">
+
+  <h1>📓 Mi Diario</h1>
+  <button onclick="logout()">🚪 Salir</button>
+
   <textarea id="texto" placeholder="¿Cómo te sientes hoy?"></textarea>
-  <button onclick="guardar()">Guardar reflexión</button>
+  <button onclick="guardar()">Guardar</button>
 
-  <!-- 🧠 IA RESULTADO -->
-  <h2>🤖 Estado emocional</h2>
-  <p id="iaResult">Escribe algo...</p>
+  <p id="iaResult">IA analizando...</p>
 
-  <!-- 📊 GRÁFICA SEMANAL -->
-  <h2>📊 Estado emocional semanal</h2>
-  <canvas id="graficaSemana"></canvas>
-
-  <!-- 🧠 ANÁLISIS -->
-  <h2>🧠 Análisis de salud mental</h2>
-  <p id="analisisSemana"></p>
-
-  <!-- 📓 LISTA -->
-  <h2>🧾 Reflexiones</h2>
+  <h2>📄 Reflexiones</h2>
   <div id="lista"></div>
+
+  <h2>📊 Semana emocional</h2>
+  <canvas id="graficaSemana"></canvas>
+  <p id="analisisSemana"></p>
 
 </div>
 

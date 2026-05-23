@@ -1,3 +1,15 @@
+ 
+/* =========================
+   🔥 FIREBASE CONFIG
+========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAZpt-SagZqzBgPL8mhRLJWRpA9yxFFBik",
+  authDomain: "mi-diario-13fb0.firebaseapp.com",
+  projectId: "mi-diario-13fb0",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
 
 /* =========================
    📦 DATOS
@@ -5,70 +17,101 @@
 let entradas = JSON.parse(localStorage.getItem("diario")) || [];
 
 /* =========================
-   🤖 IA EMOCIONAL (LOCAL)
+   🔐 LOGIN EMAIL
+========================= */
+function login() {
+  auth.signInWithEmailAndPassword(email.value, password.value)
+    .then(showApp)
+    .catch(e => alert(e.message));
+}
+
+function register() {
+  auth.createUserWithEmailAndPassword(email.value, password.value)
+    .then(showApp)
+    .catch(e => alert(e.message));
+}
+
+/* 🔵 GOOGLE LOGIN */
+function loginGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  auth.signInWithPopup(provider)
+    .then(showApp)
+    .catch(e => alert(e.message));
+}
+
+/* 🚪 LOGOUT */
+function logout() {
+  auth.signOut().then(() => location.reload());
+}
+
+/* 👤 AUTO LOGIN */
+auth.onAuthStateChanged(user => {
+  if (user) showApp();
+});
+
+/* =========================
+   📱 SHOW APP
+========================= */
+function showApp() {
+  loginBox.classList.add("hidden");
+  app.classList.remove("hidden");
+
+  render();
+  actualizarSemana();
+}
+
+/* =========================
+   🤖 IA EMOCIONAL AVANZADA
 ========================= */
 function analizarEmocion(texto) {
   texto = texto.toLowerCase();
 
-  if (texto.includes("feliz") || texto.includes("genial") || texto.includes("bien") || texto.includes("contento")) {
-    return "feliz";
-  }
+  let score = 0;
 
-  if (texto.includes("triste") || texto.includes("mal") || texto.includes("solo") || texto.includes("deprimido")) {
-    return "triste";
-  }
+  const positivo = ["feliz", "genial", "bien", "amor", "contento", "felicidad"];
+  const negativo = ["triste", "mal", "solo", "odio", "ansiedad", "cansado"];
 
-  return "neutro";
+  positivo.forEach(p => { if (texto.includes(p)) score += 1; });
+  negativo.forEach(n => { if (texto.includes(n)) score -= 1; });
+
+  if (score >= 2) return "muy feliz 😄";
+  if (score === 1) return "feliz 🙂";
+  if (score === 0) return "neutral 😐";
+  if (score === -1) return "triste 🙁";
+  return "muy triste 😢";
 }
 
 /* LIVE IA */
-document.getElementById("texto")?.addEventListener("input", (e) => {
-  const emo = analizarEmocion(e.target.value);
-  const el = document.getElementById("iaResult");
-  if (el) el.innerText = "Estado detectado: " + emo;
+document.getElementById("texto").addEventListener("input", e => {
+  iaResult.innerText = "IA: " + analizarEmocion(e.target.value);
 });
 
 /* =========================
-   💾 GUARDAR ENTRADA
+   💾 GUARDAR
 ========================= */
 function guardar() {
   const texto = document.getElementById("texto").value;
-  const file = document.getElementById("imagen")?.files[0];
-
   if (!texto) return;
 
-  const emocion = analizarEmocion(texto);
-
-  const reader = new FileReader();
-
-  reader.onload = function () {
-
-    const entrada = {
-      id: Date.now(),
-      texto,
-      imagen: reader.result || null,
-      emocion,
-      fecha: new Date().toISOString()
-    };
-
-    entradas.unshift(entrada);
-    localStorage.setItem("diario", JSON.stringify(entradas));
-
-    render();
-    actualizarSemana();
+  const entrada = {
+    id: Date.now(),
+    texto,
+    emocion: analizarEmocion(texto),
+    fecha: new Date().toISOString()
   };
 
-  if (file) reader.readAsDataURL(file);
-  else reader.onload();
+  entradas.unshift(entrada);
+  localStorage.setItem("diario", JSON.stringify(entradas));
+
+  render();
+  actualizarSemana();
 }
 
 /* =========================
    🧾 RENDER
 ========================= */
 function render() {
-  const lista = document.getElementById("lista");
-  if (!lista) return;
-
   lista.innerHTML = "";
 
   entradas.forEach(e => {
@@ -77,42 +120,20 @@ function render() {
         <p>${e.texto}</p>
         <small>${e.emocion} • ${new Date(e.fecha).toLocaleString()}</small>
 
-        ${e.imagen ? `<img src="${e.imagen}" style="width:100%; border-radius:10px;">` : ""}
-
-        <button onclick="compartir(${e.id})">🔗 Compartir</button>
-        <button onclick="crearStory(${e.id})">📸 Story</button>
+        <button onclick="crearImagen(${e.id})">
+          📱 Compartir WhatsApp / Instagram
+        </button>
       </div>
     `;
   });
 }
 
 /* =========================
-   🔗 COMPARTIR LINK
+   📸 IMAGEN
 ========================= */
-function compartir(id) {
+function crearImagen(id) {
   const e = entradas.find(x => x.id === id);
   if (!e) return;
-
-  const url = `${location.origin}${location.pathname}?id=${id}`;
-
-  if (navigator.share) {
-    navigator.share({
-      title: "Mi reflexión",
-      text: e.texto,
-      url
-    });
-  } else {
-    navigator.clipboard.writeText(url);
-    alert("Enlace copiado 🔗");
-  }
-}
-
-/* =========================
-   📸 STORY (INSTAGRAM / WHATSAPP)
-========================= */
-function crearStory(id) {
-  const entrada = entradas.find(e => e.id === id);
-  if (!entrada) return;
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -120,132 +141,88 @@ function crearStory(id) {
   canvas.width = 1080;
   canvas.height = 1920;
 
-  /* 🎨 Fondo */
-  const grad = ctx.createLinearGradient(0, 0, 1080, 1920);
-  grad.addColorStop(0, "#0f2027");
-  grad.addColorStop(0.5, "#203a43");
-  grad.addColorStop(1, "#2c5364");
+  const grad = ctx.createLinearGradient(0,0,1080,1920);
+  grad.addColorStop(0, "#141e30");
+  grad.addColorStop(1, "#243b55");
 
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0,0,1080,1920);
 
-  /* 🧠 Título */
   ctx.fillStyle = "white";
   ctx.textAlign = "center";
   ctx.font = "bold 70px Arial";
-  ctx.fillText("💭 Mi reflexión", 540, 250);
+  ctx.fillText("💭 Reflexión", 540, 200);
 
-  /* 💬 TEXTO */
   ctx.font = "50px Arial";
 
-  const palabras = entrada.texto.split(" ");
-  let linea = "";
   let y = 600;
+  let line = "";
 
-  for (let i = 0; i < palabras.length; i++) {
-    let test = linea + palabras[i] + " ";
-
-    if (test.length > 20) {
-      ctx.fillText(linea, 540, y);
-      linea = palabras[i] + " ";
+  for (let w of e.texto.split(" ")) {
+    const test = line + w + " ";
+    if (test.length > 22) {
+      ctx.fillText(line, 540, y);
+      line = w + " ";
       y += 80;
     } else {
-      linea = test;
+      line = test;
     }
   }
 
-  ctx.fillText(linea, 540, y);
+  ctx.fillText(line, 540, y);
 
-  /* 😊 EMOCIÓN */
   ctx.font = "60px Arial";
-  ctx.fillText(`Estado: ${entrada.emocion}`, 540, y + 150);
+  ctx.fillText(e.emocion, 540, y + 160);
 
-  /* 📅 FECHA */
-  ctx.font = "35px Arial";
-  ctx.fillText(new Date(entrada.fecha).toLocaleDateString(), 540, y + 230);
-
-  /* 📥 DESCARGA */
-  const link = document.createElement("a");
-  link.download = "mi-reflexion-story.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  const a = document.createElement("a");
+  a.download = "reflexion.png";
+  a.href = canvas.toDataURL();
+  a.click();
 }
 
 /* =========================
-   📊 ESTADÍSTICAS SEMANALES
+   📊 SEMANA
 ========================= */
 function obtenerSemana() {
-  const ahora = new Date();
   const hace7 = new Date();
-  hace7.setDate(ahora.getDate() - 7);
+  hace7.setDate(hace7.getDate() - 7);
 
-  return entradas.filter(e => {
-    const f = new Date(e.fecha);
-    return f >= hace7 && f <= ahora;
-  });
+  return entradas.filter(e => new Date(e.fecha) >= hace7);
 }
 
 function calcularSemana() {
-  let stats = { feliz: 0, neutro: 0, triste: 0 };
+  let stats = { feliz:0, neutro:0, triste:0 };
 
   obtenerSemana().forEach(e => {
-    if (stats[e.emocion] !== undefined) {
-      stats[e.emocion]++;
-    }
+    if (e.emocion.includes("feliz")) stats.feliz++;
+    else if (e.emocion.includes("triste")) stats.triste++;
+    else stats.neutro++;
   });
 
   return stats;
 }
 
-let chartSemana;
+let chart;
 
-function renderSemana() {
+function actualizarSemana() {
+  const s = calcularSemana();
+
+  analisisSemana.innerText =
+    s.feliz > s.triste ? "🟢 Semana positiva"
+    : s.triste > s.feliz ? "🔴 Semana difícil"
+    : "🟡 Semana equilibrada";
+
   const ctx = document.getElementById("graficaSemana");
-  if (!ctx) return;
 
-  const stats = calcularSemana();
+  if (chart) chart.destroy();
 
-  if (chartSemana) chartSemana.destroy();
-
-  chartSemana = new Chart(ctx, {
+  chart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: ["Feliz", "Neutro", "Triste"],
       datasets: [{
-        label: "Últimos 7 días",
-        data: [stats.feliz, stats.neutro, stats.triste]
+        data: [s.feliz, s.neutro, s.triste]
       }]
     }
   });
 }
-
-function analisisSemana() {
-  const stats = calcularSemana();
-  const total = stats.feliz + stats.neutro + stats.triste;
-
-  if (total === 0) return "Sin datos esta semana";
-
-  const feliz = (stats.feliz / total) * 100;
-  const triste = (stats.triste / total) * 100;
-
-  if (feliz > 60) return "🟢 Semana positiva";
-  if (triste > 50) return "🔴 Semana complicada";
-
-  return "🟡 Semana equilibrada";
-}
-
-/* =========================
-   🔄 UPDATE GENERAL
-========================= */
-function actualizarSemana() {
-  const el = document.getElementById("analisisSemana");
-  if (el) el.innerText = analisisSemana();
-
-  renderSemana();
-}
-
-/* =========================
-   🚀 INIT
-========================= */
-render();
-actualizarSemana();
