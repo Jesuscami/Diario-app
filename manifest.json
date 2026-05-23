@@ -7,12 +7,12 @@
   "theme_color": "#2c5364",
   "icons": [
     {
-      "src": "icono.png",
+      "src": "Mi_diario.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icono.png",
+      "src": "Mi_diario.png",
       "sizes": "512x512",
       "type": "image/png"
     }
