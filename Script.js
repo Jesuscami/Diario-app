@@ -3,10 +3,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyAZpt-SagZqzBgPL8mhRLJWRpA9yxFFBik",
   authDomain: "mi-diario-13fb0.firebaseapp.com",
   projectId: "mi-diario-13fb0",
-  storageBucket: "mi-diario-13fb0.firebasestorage.app",
-  messagingSenderId: "649575206242",
-  appId: "1:649575206242:web:c57a913de39e592af8b03b",
-  measurementId: "G-6B4Z17XS1L"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -26,20 +22,27 @@ function login() {
   const pass = document.getElementById("password").value;
 
   auth.signInWithEmailAndPassword(email, pass)
-    .then(showApp)
-    .catch(e => document.getElementById("error").innerText = e.message);
+    .then(() => {
+      showApp();
+    })
+    .catch(err => {
+      alert("Error login: " + err.message);
+    });
 }
-
 /* 🆕 REGISTER */
 function register() {
   const email = document.getElementById("email").value;
   const pass = document.getElementById("password").value;
 
   auth.createUserWithEmailAndPassword(email, pass)
-    .then(showApp)
-    .catch(e => document.getElementById("error").innerText = e.message);
+    .then(() => {
+      alert("Usuario creado ✅");
+      showApp();
+    })
+    .catch(err => {
+      alert("Error registro: " + err.message);
+    });
 }
-
 /* 🚪 LOGOUT */
 function logout() {
   auth.signOut().then(() => location.reload());
